@@ -1,0 +1,42 @@
+name: Build executable
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [working]
+    paths:
+      - "WandEnhancer/**"
+      - "build.ps1"
+      - ".github/workflows/build.yml"
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Build unsigned executable
+        shell: pwsh
+        run: ./build.ps1 -NoSign
+
+      - name: Upload unsigned executable
+        uses: actions/upload-artifact@v4
+        with:
+          name: WandEnhancer-unsigned
+          path: release/WandEnhancer.exe
